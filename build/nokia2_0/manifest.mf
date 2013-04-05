@@ -1,0 +1,7 @@
+MIDlet-1: Hike,/hike_app_icon.png,com.bsb.hike.Hike
+MIDlet-Permissions: javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, com.nokia.mid.s40.io.Connector.localmsg, javax.microedition.io.Connector.socket, javax.microedition.pim.ContactList.read, javax.microedition.pim.ContactList.write
+MIDlet-Vendor: BSB
+MIDlet-Name: hike
+MIDlet-Version: 1.7
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.1
