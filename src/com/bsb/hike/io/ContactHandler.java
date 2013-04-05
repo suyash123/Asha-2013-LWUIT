@@ -91,49 +91,10 @@ public class ContactHandler implements AppConstants {
                 addContact(contact, contactsVector);
                 contact = null;
             }
-            /*src = new ContactSource[2];
-            src[0] = new ContactSource();
-            src[0].setContactSource(SIM);
-            src[1] = new ContactSource();
-            src[1].setContactSource(PHONE);
-            //  while un-commenting below lines, make sure to set array size 3
-            //  src[2] = new ContactSource();
-            //  src[2].setContactSource(ACCORDING_TO_USER_SETTING);
-
-            Contact[] contactsArrayFirst = contactsConn.getFirst(src, 1, null);
-            if (contactsArrayFirst != null) {
-                Contact nextContact = contactsArrayFirst[0];
-
-                for (int j = 0; j < 200; j++) {
-                    try {
-                        Contact[] contactsArray = contactsConn.getNext(src, nextContact, null, true, 10);
-                        if (contactsArray != null && contactsArray.length > 0) {
-                             
-                            Log.v("got next" + j, contactsArray.length + EMPTY_STRING);
-                            if (contactsArray.length == 1) {
-                                addContact(contactsArray[0], contactsVector);
-                                break;
-                            }
-                            for (int i = 0; i < contactsArray.length - 1; i++) {
-                                addContact(contactsArray[i], contactsVector);
-                            }
-                            nextContact = contactsArray[contactsArray.length - 1];
-                        } else {
-                            break;
-                        }
-                        contactsArray = null;
-                    } catch (Throwable e) {
-                     
-                        Log.v(TAG, e.getClass().getName() + " Exception handled");
-                    }
-                }
-                nextContact = null;
-            }
-            contactsArrayFirst = null;
-            src[0] = null;
-            src[1] = null;
-            src = null;*/
         } catch (Exception ex) {
+			//#ifdef DEBUG         
+    		//#             Log.v(TAG, "Exception during enumeratin ::: "+ex);
+    		            //#endif
             ex.printStackTrace();
         }
               Runtime.getRuntime().gc();
@@ -141,47 +102,53 @@ public class ContactHandler implements AppConstants {
     }
 
     private void addContact(Contact contact, Vector/*<AddressBookRequestEntry>*/ contactsVector) {
-        String [] names = null;
-        if (contactList.isSupportedField(Contact.NAME))
-            names = contact.getStringArray(Contact.NAME, Contact.ATTR_NONE);
-        String name = "";
-        if (contactList.isSupportedArrayElement(Contact.NAME, Contact.NAME_GIVEN) && names != null)
-             name = names[Contact.NAME_GIVEN];//contact.getDisplayName();
-        if (contactList.isSupportedArrayElement(Contact.NAME, Contact.NAME_FAMILY) && names != null){
-            if(!name.equals(""))
-                name = " " + names[Contact.NAME_FAMILY];//contact.getDisplayName();
-            else
-                name =names[Contact.NAME_FAMILY];
-        }
-
-        String id = String.valueOf(contact.getInt(Contact.UID, 0));//contact.getContactID();
-        
-        Vector numbers = new Vector();
-        if (contactList.isSupportedAttribute(Contact.TEL, Contact.ATTR_MOBILE))
-            numbers.addElement(contact.getString(Contact.TEL, Contact.ATTR_MOBILE));
-        if (contactList.isSupportedAttribute(Contact.TEL, Contact.ATTR_HOME))
-            numbers.addElement(contact.getString(Contact.TEL, Contact.ATTR_HOME));
-        if (contactList.isSupportedAttribute(Contact.TEL, Contact.ATTR_OTHER))
-            numbers.addElement(contact.getString(Contact.TEL, Contact.ATTR_OTHER));
-        if (contactList.isSupportedAttribute(Contact.TEL, Contact.ATTR_PAGER))
-            numbers.addElement(contact.getString(Contact.TEL, Contact.ATTR_PAGER));
-        if (contactList.isSupportedAttribute(Contact.TEL, Contact.ATTR_FAX))
-            numbers.addElement(contact.getString(Contact.TEL, Contact.ATTR_FAX));
-//        PhoneNumber[] numbers = contact.getNumbers();
-        if (numbers != null) {
-            for (int k = 0; k < numbers.size(); k++) {
-                String number = (String)numbers.elementAt(k);//numbers[k].getNumber();
-                if (Validator.validatePhoneNum(number)) {
-                    AddressBookRequestEntry entry = new AddressBookRequestEntry(id, number, name);
-                    contactsVector.addElement(entry);
-                    entry = null;
-                }
-                number = null;
-            }
-        }
-        name = null;
-        id = null;
-        numbers = null;
+        try{
+	        String name = "";
+	        if(contactList.isSupportedField(Contact.FORMATTED_NAME) && contact.countValues(Contact.FORMATTED_NAME) > 0){
+	        	name = contact.getString(Contact.FORMATTED_NAME,0);
+	        }
+	        
+	        String id = "";
+	        if(contactList.isSupportedField(Contact.UID) && contact.countValues(Contact.UID) > 0){
+	        	id = contact.getString(Contact.UID, 0);//contact.getContactID();
+	        }
+	        
+	        Vector numbers = new Vector();
+	        if(contactList.isSupportedField(Contact.TEL) && contact.countValues(Contact.TEL) > 0){
+	        	for (int i = 0; i < contact.countValues(Contact.TEL); i++) {
+	        		int attribute = contact.getAttributes(Contact.TEL, i);
+	        		if(attribute == Contact.ATTR_MOBILE)
+	        			numbers.addElement(contact.getString(Contact.TEL, i));
+	        		else if(attribute == Contact.ATTR_HOME)
+	        			numbers.addElement(contact.getString(Contact.TEL, i));
+	        		else if(attribute == Contact.ATTR_OTHER)
+	        			numbers.addElement(contact.getString(Contact.TEL, i));
+	        		else if(attribute == Contact.ATTR_PAGER)
+	        			numbers.addElement(contact.getString(Contact.TEL, i));
+	        		else if(attribute == Contact.ATTR_FAX)
+	        			numbers.addElement(contact.getString(Contact.TEL, i));
+				}
+	        }
+	//        PhoneNumber[] numbers = contact.getNumbers();
+	        if (numbers != null) {
+	            for (int k = 0; k < numbers.size(); k++) {
+	                String number = (String)numbers.elementAt(k);//numbers[k].getNumber();
+	                if (Validator.validatePhoneNum(number)) {
+	                    AddressBookRequestEntry entry = new AddressBookRequestEntry(id, number, name);
+	                    contactsVector.addElement(entry);
+	                    entry = null;
+	                }
+	                number = null;
+	            }
+	        }
+	        name = null;
+	        id = null;
+	        numbers = null;
+    	}catch (Exception e) {
+    		//#ifdef DEBUG         
+    		//#             Log.v(TAG, "Exception during adding contacts to addressBook ::: "+e);
+    		            //#endif
+		}
     }
 
     /**
