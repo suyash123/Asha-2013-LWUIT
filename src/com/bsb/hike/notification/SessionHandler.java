@@ -62,13 +62,13 @@ public class SessionHandler implements NotificationSessionListener {
         opened = false;
     }
 
-    public boolean isWakeUp0() throws NotificationException {
+   /* public boolean isWakeUp0() throws NotificationException {
         return session.isWakeUp();
     }
 
     public void setWakeUp0(boolean enabled) throws NotificationException {
         session.setWakeUp(enabled);
-    }
+    }*/
 
     public int getReceiveAtLatest0(boolean quiet) throws NotificationException {
         int ral = session.getReceiveAtLatest();
@@ -280,7 +280,7 @@ public class SessionHandler implements NotificationSessionListener {
                         sent = ClientConnectionHandler.sendPushNotifData(nid);
                         showInfoText("> NID sent to server.." + sent);
                         if (sent) {
-                            setWakeUp(true);
+//                            setWakeUp(true);
                         }
                     } catch (ConnectionFailedException ex) {
                     } catch (IOException ex) {
@@ -298,6 +298,7 @@ public class SessionHandler implements NotificationSessionListener {
         // Check the availability of Notifications Enabler before trying to connect
 //        NotificationsEnablerInstaller installer = InstallerFactory.getInstaller();
 //        installer.checkAndUpdateNapiEnabler(this, null, midlet);
+        Log.v(TAG, "Intialise ::: Register");
         open();
         register();
     }
@@ -482,7 +483,7 @@ public class SessionHandler implements NotificationSessionListener {
     /**
      * @see NotificationSession#isWakeUp()
      */
-    public void isWakeUp() {
+    /*public void isWakeUp() {
         showInfoText("> Is wake-up");
 
         try {
@@ -507,14 +508,14 @@ public class SessionHandler implements NotificationSessionListener {
         }
 
         showInfoText("< Is wake-up");
-    }
+    }*/
 
     /**
      * @param wakeUp If true then the application is woken up in the event of
      * notifications.
      * @see NotificationSession#setWakeUp(boolean)
      */
-    public void setWakeUp(boolean wakeUp) {
+    /*public void setWakeUp(boolean wakeUp) {
         showInfoText("> Set wake-up: " + wakeUp);
 
         try {
@@ -538,7 +539,7 @@ public class SessionHandler implements NotificationSessionListener {
         }
 
         showInfoText("< Set wake-up");
-    }
+    }*/
 
     private void setReceiveAtLatest() {
         showInfoText("> Set receive at latest");

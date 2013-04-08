@@ -92,9 +92,7 @@ public class ContactHandler implements AppConstants {
                 contact = null;
             }
         } catch (Exception ex) {
-			//#ifdef DEBUG         
-    		//#             Log.v(TAG, "Exception during enumeratin ::: "+ex);
-    		            //#endif
+            Log.v(TAG, "Exception during enumeratin ::: "+ex);
             ex.printStackTrace();
         }
               Runtime.getRuntime().gc();
@@ -104,7 +102,29 @@ public class ContactHandler implements AppConstants {
     private void addContact(Contact contact, Vector/*<AddressBookRequestEntry>*/ contactsVector) {
         try{
 	        String name = "";
-	        if(contactList.isSupportedField(Contact.FORMATTED_NAME) && contact.countValues(Contact.FORMATTED_NAME) > 0){
+                String [] names = new String[contactList.stringArraySize(Contact.NAME)];
+                if(contact.countValues(Contact.NAME) > 0){
+                    names = contact.getStringArray(Contact.NAME, 0);
+                    if(names != null && names.length > 0 ){
+                        String firstName = "";
+                        String lastName = "";
+                        for (int i = 0; i < names.length; i++) {
+                            if(names[i] != null && names[i].length() > 0){
+                                if(i == Contact.NAME_FAMILY)
+                                    lastName = names[i];
+				else if(i == Contact.NAME_GIVEN)
+                                    firstName = names[i];
+                            }
+                        }
+                        if(!firstName.equals("") && !lastName.equals(""))
+                            name = firstName + " " + lastName;
+                        else if(!firstName.equals(""))
+                            name = firstName;
+                        else if(!lastName.equals(""))
+                            name = lastName;
+                    }
+                }
+	        if(name.equals("") && contactList.isSupportedField(Contact.FORMATTED_NAME) && contact.countValues(Contact.FORMATTED_NAME) > 0){
 	        	name = contact.getString(Contact.FORMATTED_NAME,0);
 	        }
 	        
@@ -116,23 +136,12 @@ public class ContactHandler implements AppConstants {
 	        Vector numbers = new Vector();
 	        if(contactList.isSupportedField(Contact.TEL) && contact.countValues(Contact.TEL) > 0){
 	        	for (int i = 0; i < contact.countValues(Contact.TEL); i++) {
-	        		int attribute = contact.getAttributes(Contact.TEL, i);
-	        		if(attribute == Contact.ATTR_MOBILE)
-	        			numbers.addElement(contact.getString(Contact.TEL, i));
-	        		else if(attribute == Contact.ATTR_HOME)
-	        			numbers.addElement(contact.getString(Contact.TEL, i));
-	        		else if(attribute == Contact.ATTR_OTHER)
-	        			numbers.addElement(contact.getString(Contact.TEL, i));
-	        		else if(attribute == Contact.ATTR_PAGER)
-	        			numbers.addElement(contact.getString(Contact.TEL, i));
-	        		else if(attribute == Contact.ATTR_FAX)
-	        			numbers.addElement(contact.getString(Contact.TEL, i));
-				}
+                            numbers.addElement(contact.getString(Contact.TEL, i));
+			}
 	        }
-	//        PhoneNumber[] numbers = contact.getNumbers();
 	        if (numbers != null) {
 	            for (int k = 0; k < numbers.size(); k++) {
-	                String number = (String)numbers.elementAt(k);//numbers[k].getNumber();
+	                String number = (String)numbers.elementAt(k);
 	                if (Validator.validatePhoneNum(number)) {
 	                    AddressBookRequestEntry entry = new AddressBookRequestEntry(id, number, name);
 	                    contactsVector.addElement(entry);
@@ -145,10 +154,8 @@ public class ContactHandler implements AppConstants {
 	        id = null;
 	        numbers = null;
     	}catch (Exception e) {
-    		//#ifdef DEBUG         
-    		//#             Log.v(TAG, "Exception during adding contacts to addressBook ::: "+e);
-    		            //#endif
-		}
+            Log.v(TAG, "Exception during adding contacts to addressBook ::: "+e);
+	}
     }
 
     /**
